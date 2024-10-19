@@ -1,0 +1,45 @@
+---
+import type { GetStaticPaths } from "astro";
+import { PokemonClient } from 'pokenode-ts'
+
+import CommonHeader from "../../components/CommonHeader.astro"
+import PokemonCard from "../../components/PokemonCard"
+
+export const getStaticPaths = (async () => {
+  const api = new PokemonClient();
+  const pokemon = await api
+    .listPokemons(0, import.meta.env.POKEMON_LIMIT)
+    .then((data) => data)
+    .catch((error) => console.error(error));
+
+  if (!pokemon) {
+    return []
+  }
+
+  return pokemon.results.map((pokemon) => {
+    return {
+      params: {
+        pokemon: pokemon.name
+      }
+    }
+  })
+}) satisfies GetStaticPaths;
+
+const { pokemon } = Astro.params
+
+---
+<html lang="en">
+  <head>
+    <CommonHeader title='Pokemon - gotta catch em all!' />
+  </head>
+  <body>
+    <header class="container">
+      <h1 class="text-8xl px-4 text-balance text-center">Pokemon!</h1>
+    </header>
+    <div class="container mx-auto">
+      <div class="grid gap-4 grid-cols-4 px-4 group lg:px-0">
+      <PokemonCard name={pokemon} size="large" transition:name={`pokemon-card-${pokemon}`} client:load />
+    </div>
+    </div>
+  </body>
+</html>

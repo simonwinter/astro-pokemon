@@ -1,0 +1,50 @@
+---
+import { PokemonClient } from 'pokenode-ts'
+import { useStore } from '@nanostores/react'
+
+import PokemonCard from '../components/PokemonCard';
+import CommonHeader from '../components/CommonHeader.astro';
+import { fade } from 'astro:transitions';
+import { pokemonList } from '../store';
+
+const getPokemon = async () => {
+  const api = new PokemonClient();
+  return await api
+    .listPokemons(0, import.meta.env.POKEMON_LIMIT)
+    .then((data) => data)
+    .catch((error) => console.error(error));
+}
+
+// let existingPokemonList = useStore(pokemonList)
+
+// let pokemon = existingPokemonList.length !== 0 ? existingPokemonList : []
+// if (existingPokemonList.length === 0) {
+//   const found = await getPokemon()
+//   if (found !== undefined) {
+//     existingPokemonList = [...found.results]
+//     pokemon = existingPokemonList
+//   }
+// }
+const pokemon = await getPokemon()
+
+---
+
+<html lang="en">
+  <head>
+    <CommonHeader title='Pokemon - gotta catch em all!' />
+  </head>
+  <body>
+    <header class="container" transition:persist>
+      <h1 class="text-8xl px-4 text-balance text-center">Pokemon!</h1>
+    </header>
+    <div class="container mx-auto">
+      <div class="grid gap-4 grid-cols-4 px-4 group lg:px-0">
+      {pokemon ? pokemon.results.map((pokemon) => {
+        return <a href={`/pokemon/${pokemon.name}`} data-astro-prefetch>
+          <PokemonCard name={pokemon.name} transition:name={`pokemon-card-${pokemon.name}`} transition:animate={fade({ duration: 500 })} client:load />
+        </a>
+      }) : null}
+    </div>
+    </div>
+  </body>
+</html>
