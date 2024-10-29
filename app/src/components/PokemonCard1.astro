@@ -1,0 +1,40 @@
+---
+import { Image } from "astro:assets";
+import { getEntry } from "astro:content";
+import { fade } from "astro:transitions";
+
+type Props = {
+  name: string
+}
+
+const { name, ...props } = Astro.props
+const pokemon = await getEntry('pokemon', name)
+const image = pokemon.data.sprites?.other?.['official-artwork']?.front_default || null
+
+---
+<div class="relative">
+  <Image decoding="async" alt={name} width={275} height={275} {...props} transition:animate={fade()} class="block transition-all ease-in-out duration-500 delay-200 opacity-0" data-pokemon-image={name} src={image ?? ''} loading='lazy' />
+  <div class="absolute inset-0 h-full w-full bg-black/10 text-black grid items-center justify-center pointer-events-none opacity-100 transition-opacity ease-in-out duration-500" data-loading>Loading</div>
+  <span class="block mt-auto text-xl font-bold text-center capitalize pt-2 pb-4">{name}</span>
+</div>
+
+<script is:inline>
+  window.loadImage = (img) => {
+    if (img['classList']) {
+      img.classList.remove('opacity-0')
+      img.classList.add('opacity-100')
+    }
+    img.nextElementSibling?.classList.add('opacity-0')
+    img.nextElementSibling?.classList.remove('opacity-100')
+  }
+  
+  document.querySelectorAll('[data-pokemon-image]').forEach((image) => {
+    if (image['complete']) {
+      window.loadImage(image)
+    }
+
+    image.addEventListener('load', (event) => {
+      window.loadImage(event.currentTarget)
+    })
+  })
+</script>

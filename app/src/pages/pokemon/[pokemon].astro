@@ -1,25 +1,18 @@
 ---
 import type { GetStaticPaths } from "astro";
-import { PokemonClient } from 'pokenode-ts'
 
 import CommonHeader from "../../components/CommonHeader.astro"
-import PokemonCard from "../../components/PokemonCard"
+import { slide } from "astro:transitions";
+import { getCollection } from "astro:content";
+import PokemonCard1 from "../../components/PokemonCard1.astro";
 
 export const getStaticPaths = (async () => {
-  const api = new PokemonClient();
-  const pokemon = await api
-    .listPokemons(0, import.meta.env.POKEMON_LIMIT)
-    .then((data) => data)
-    .catch((error) => console.error(error));
+  const pokemon = await getCollection('pokemon')
 
-  if (!pokemon) {
-    return []
-  }
-
-  return pokemon.results.map((pokemon) => {
+  return pokemon.map((pokemon) => {
     return {
       params: {
-        pokemon: pokemon.name
+        pokemon: pokemon.data.name
       }
     }
   })
@@ -30,15 +23,15 @@ const { pokemon } = Astro.params
 ---
 <html lang="en">
   <head>
-    <CommonHeader title='Pokemon - gotta catch em all!' />
+    <CommonHeader title={`Pokemon - gotta catch em all! | ${pokemon}`} />
   </head>
   <body>
     <header class="container">
-      <h1 class="text-8xl px-4 text-balance text-center">Pokemon!</h1>
+      <h1 class="text-8xl px-4 text-balance text-center">{pokemon}</h1>
     </header>
     <div class="container mx-auto">
       <div class="grid gap-4 grid-cols-4 px-4 group lg:px-0">
-      <PokemonCard name={pokemon} size="large" transition:name={`pokemon-card-${pokemon}`} client:load />
+      <PokemonCard1 name={pokemon} transition:name={`pokemon-card-${pokemon}`} transition:animate={slide({ duration: 500 })} />
     </div>
     </div>
   </body>

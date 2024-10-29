@@ -1,0 +1,16 @@
+---
+import { PokemonClient } from 'pokenode-ts'
+
+import { fade } from 'astro:transitions';
+import PokemonCard1 from './PokemonCard1.astro';
+import { getCollection } from 'astro:content';
+
+const pokemon = await getCollection('pokemon')
+
+---
+<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4 group lg:px-0">
+  {pokemon.map(({ data }) => {
+    return <a href={`/pokemon/${data.name}`} data-astro-prefetch>
+    <PokemonCard1 name={data.name} transition:name={`pokemon-card-${data.name}`} transition:animate={fade({ duration: 500 })} />
+  </a>})}
+</div>
